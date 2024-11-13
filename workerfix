@@ -1,0 +1,75 @@
+import React, { useState } from 'react';
+import { Box, Button, List, ListItem, ListItemText, Divider, Typography } from '@mui/material';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { pdfjs } from 'react-pdf';
+import * as pdfWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker; // Set worker source directly to match version
+
+function PdfViewer() {
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const [selectedPdf, setSelectedPdf] = useState(null);
+
+  // Handle file upload
+  const handleUpload = (event) => {
+    const files = Array.from(event.target.files);
+    setPdfFiles(files);
+    setSelectedPdf(files[0]);
+  };
+
+  // Handle selecting a PDF from the list
+  const handleSelectPdf = (pdf) => {
+    setSelectedPdf(pdf);
+  };
+
+  return (
+    <Box display="flex" flexDirection="column" height="100vh" p={2}>
+      <Typography variant="h5" mb={2}>PDF Viewer</Typography>
+      <Button
+        variant="contained"
+        component="label"
+        sx={{ mb: 2 }}
+      >
+        Upload PDFs
+        <input
+          type="file"
+          hidden
+          accept="application/pdf"
+          multiple
+          onChange={handleUpload}
+        />
+      </Button>
+
+      <Box display="flex" flexGrow={1}>
+        {/* PDF Viewer on the left */}
+        <Box flex={2} border={1} borderColor="grey.300" p={1} mr={2} display="flex" justifyContent="center" alignItems="center">
+          {selectedPdf ? (
+            <Worker>
+              <Viewer fileUrl={URL.createObjectURL(selectedPdf)} />
+            </Worker>
+          ) : (
+            <Typography variant="body1">Select a PDF to view</Typography>
+          )}
+        </Box>
+
+        {/* List of PDFs on the right */}
+        <Box flex={1} border={1} borderColor="grey.300" p={1} overflow="auto">
+          <Typography variant="h6" mb={1}>PDF List</Typography>
+          <List>
+            {pdfFiles.map((pdf, index) => (
+              <React.Fragment key={index}>
+                <ListItem button onClick={() => handleSelectPdf(pdf)}>
+                  <ListItemText primary={pdf.name} />
+                </ListItem>
+                <Divider />
+              </React.Fragment>
+            ))}
+          </List>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+export default PdfViewer;

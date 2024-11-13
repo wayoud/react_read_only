@@ -1,0 +1,314 @@
+To build a React web app with Material UI and the requirements you've outlined, I will walk you through the process step by step. Here's a high-level breakdown of the features you want:
+
+### Features:
+1. **Login Page**: User authentication.
+2. **Admin Panel**: After login, the admin sees a panel with a navigation bar containing:
+   - Logo in the header.
+   - Logout button.
+3. **Side Navigation**: Includes pages for managing PDFs.
+4. **PDF Management**: The admin can view a list of PDFs stored in a folder (like `Desktop/scan`) and click to open them on the left side.
+5. **Form for Metadata**: A form to capture metadata for each PDF (name, year, responsible person, police number, part number, observations).
+6. **Data Grid**: Display all PDFs in a data grid, with their metadata.
+
+---
+
+### Project Setup
+1. **Create a React App**:
+   First, set up a new React project using `create-react-app`:
+   ```bash
+   npx create-react-app pdf-admin-panel
+   cd pdf-admin-panel
+   ```
+
+2. **Install Required Dependencies**:
+   You'll need Material UI components, React Router for navigation, and additional packages like `react-pdf` to render PDF files, and a few others.
+   ```bash
+   npm install @mui/material @emotion/react @emotion/styled react-router-dom react-pdf @mui/x-data-grid
+   ```
+
+---
+
+### Folder Structure
+Your folder structure should look something like this:
+
+```
+/src
+  /components
+    /Header.js
+    /Sidebar.js
+    /PdfViewer.js
+    /PdfForm.js
+    /PdfList.js
+  /pages
+    /Login.js
+    /AdminPanel.js
+  /App.js
+  /index.js
+```
+
+---
+
+### Step-by-Step Implementation
+
+#### 1. **Login Page** (Login.js)
+First, create a simple login page:
+
+```jsx
+// src/pages/Login.js
+import React, { useState } from "react";
+import { TextField, Button, Typography, Container } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // Basic authentication check (replace with actual logic later)
+    if (username === "admin" && password === "password") {
+      navigate("/admin");
+    } else {
+      alert("Invalid credentials");
+    }
+  };
+
+  return (
+    <Container maxWidth="sm">
+      <Typography variant="h4" gutterBottom>
+        Login
+      </Typography>
+      <TextField
+        label="Username"
+        fullWidth
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        margin="normal"
+      />
+      <TextField
+        label="Password"
+        type="password"
+        fullWidth
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        margin="normal"
+      />
+      <Button variant="contained" color="primary" onClick={handleLogin}>
+        Login
+      </Button>
+    </Container>
+  );
+};
+
+export default Login;
+```
+
+#### 2. **Admin Panel** (AdminPanel.js)
+This page is where your side nav and PDF management will appear:
+
+```jsx
+// src/pages/AdminPanel.js
+import React, { useState, useEffect } from "react";
+import { Container, Box, Typography } from "@mui/material";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import PdfList from "../components/PdfList";
+import PdfViewer from "../components/PdfViewer";
+import PdfForm from "../components/PdfForm";
+
+const AdminPanel = () => {
+  const [selectedPdf, setSelectedPdf] = useState(null);
+  const [pdfs, setPdfs] = useState([]);
+  
+  // Fetch PDF metadata (this could come from a database or local files)
+  useEffect(() => {
+    // For now, hardcode some example PDF data
+    setPdfs([
+      { id: 1, name: "Document 1", year: 2020 },
+      { id: 2, name: "Document 2", year: 2021 }
+    ]);
+  }, []);
+  
+  return (
+    <Box sx={{ display: "flex" }}>
+      <Sidebar />
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Header />
+        <Typography variant="h5" gutterBottom>Manage PDFs</Typography>
+        <PdfList pdfs={pdfs} onSelectPdf={setSelectedPdf} />
+        {selectedPdf && (
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <PdfViewer pdf={selectedPdf} />
+            <PdfForm pdf={selectedPdf} />
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+export default AdminPanel;
+```
+
+#### 3. **Header Component** (Header.js)
+The header with the logo and logout button.
+
+```jsx
+// src/components/Header.js
+import React from "react";
+import { AppBar, Toolbar, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+const Header = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Redirect to login page (for now, just navigate away)
+    navigate("/login");
+  };
+
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          PDF Admin Panel
+        </Typography>
+        <Button color="inherit" onClick={handleLogout}>Logout</Button>
+      </Toolbar>
+    </AppBar>
+  );
+};
+
+export default Header;
+```
+
+#### 4. **Sidebar Component** (Sidebar.js)
+A sidebar for navigation:
+
+```jsx
+// src/components/Sidebar.js
+import React from "react";
+import { Box, List, ListItem, ListItemText, Divider } from "@mui/material";
+import { Link } from "react-router-dom";
+
+const Sidebar = () => {
+  return (
+    <Box sx={{ width: 250, bgcolor: "background.paper" }}>
+      <List>
+        <ListItem button component={Link} to="/admin">
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        <Divider />
+        <ListItem button component={Link} to="/admin/pdfs">
+          <ListItemText primary="Manage PDFs" />
+        </ListItem>
+      </List>
+    </Box>
+  );
+};
+
+export default Sidebar;
+```
+
+#### 5. **PDF List Component** (PdfList.js)
+Display a list of PDFs stored locally or in a database.
+
+```jsx
+// src/components/PdfList.js
+import React from "react";
+import { List, ListItem, ListItemText, Button } from "@mui/material";
+
+const PdfList = ({ pdfs, onSelectPdf }) => {
+  return (
+    <List>
+      {pdfs.map((pdf) => (
+        <ListItem button key={pdf.id} onClick={() => onSelectPdf(pdf)}>
+          <ListItemText primary={pdf.name} secondary={`Year: ${pdf.year}`} />
+        </ListItem>
+      ))}
+    </List>
+  );
+};
+
+export default PdfList;
+```
+
+#### 6. **PDF Viewer Component** (PdfViewer.js)
+Render the PDF when selected:
+
+```jsx
+// src/components/PdfViewer.js
+import React from "react";
+import { Document, Page } from "react-pdf";
+
+const PdfViewer = ({ pdf }) => {
+  return (
+    <div style={{ width: "50%" }}>
+      <Document file={`/path/to/pdf/folder/${pdf.name}.pdf`}>
+        <Page pageNumber={1} />
+      </Document>
+    </div>
+  );
+};
+
+export default PdfViewer;
+```
+
+#### 7. **PDF Form Component** (PdfForm.js)
+A form to enter metadata about the PDF:
+
+```jsx
+// src/components/PdfForm.js
+import React, { useState } from "react";
+import { TextField, Button, Box } from "@mui/material";
+
+const PdfForm = ({ pdf }) => {
+  const [formData, setFormData] = useState({
+    name: pdf.name || "",
+    year: pdf.year || "",
+    responsibleName: "",
+    policeNumber: "",
+    partNumber: "",
+    observations: ""
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = () => {
+    // Handle form submission, e.g., save the data to a database or state
+    console.log(formData);
+  };
+
+  return (
+    <Box sx={{ width: "50%" }}>
+      <TextField
+        label="PDF Name"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Year"
+        name="year"
+        value={formData.year}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Responsible Name"
+        name="responsibleName"
+        value={formData.responsibleName}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Police Number"
+        name="policeNumber"
+        value={formData.police

@@ -1,0 +1,73 @@
+```jsx
+Number}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Part Number"
+        name="partNumber"
+        value={formData.partNumber}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Observations"
+        name="observations"
+        value={formData.observations}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        multiline
+        rows={4}
+      />
+      <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 2 }}>
+        Save Metadata
+      </Button>
+    </Box>
+  );
+};
+
+export default PdfForm;
+```
+
+#### 8. **App Component** (App.js)
+Finally, the main `App.js` file to wire everything together with routing:
+
+```jsx
+// src/App.js
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+import AdminPanel from "./pages/AdminPanel";
+
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        {/* You can add more routes for PDF management here */}
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
+```
+
+### 9. **Styling & Additional Configuration**
+
+- You can customize the styling further by leveraging Material UI's `sx` prop or custom CSS files.
+- For the PDF rendering (`react-pdf`), you'll need to ensure that your PDFs are correctly served and accessible through a public folder or API endpoint.
+- To improve the experience, consider implementing pagination or lazy loading for the list of PDFs if you expect a large number of files.
+
+### 10. **Testing and Deployment**
+
+- **Testing**: Before deploying, make sure to test the app locally. You can use tools like Jest or React Testing Library for unit and integration tests.
+- **Deployment**: Once the app is ready, deploy it using services like Vercel, Netlify, or Firebase Hosting.
+
+### Conclusion
+
+This setup provides a basic framework for building your admin panel with React, Material UI, and PDF management. You can extend the functionality by adding features like file uploads, authentication with Firebase or a backend, and advanced PDF management features such as annotations or batch editing.
